@@ -11,7 +11,7 @@ import { toggleModal } from '../../store/actions/uiActions';
 import Avatar from '../Avatar';
 import UserAvatar from '../../assets/images/profile/avatar.svg';
 import { getOthersData, signOutUser } from '../../store/actions/userActions';
-import { searchTweetsByHashtag } from '../../store/actions/searchActions';
+import { searchTweetsByHashtag } from '../../store/actions/tweetsActions';
 
 const Header = ({ info, toggleLogin, toggleSignUp, onSignOutClick, isLoggedIn, getUserData, onSearchFormSubmit }) => {
   const history = useHistory();
@@ -19,7 +19,7 @@ const Header = ({ info, toggleLogin, toggleSignUp, onSignOutClick, isLoggedIn, g
   const parsed = queryString.parse(location.search);
 
   useEffect(() => {
-    if (parsed.term) onSearchFormSubmit(parsed.term);
+    onSearchFormSubmit(location.search);
   }, []);
 
   return (
@@ -31,10 +31,8 @@ const Header = ({ info, toggleLogin, toggleSignUp, onSignOutClick, isLoggedIn, g
             search: parsed.term ? parsed.term : '',
           }}
           onSubmit={({ search }, { resetForm }) => {
-            console.log(search);
-            onSearchFormSubmit(search);
+            onSearchFormSubmit(`?term=${search}`);
             history.push(`/search?term=${search}`);
-            resetForm({ search: null });
           }}
         >
           {({
@@ -116,7 +114,7 @@ const mapDispatchToProps = (dispatch) => ({
   toggleSignUp: () => dispatch(toggleModal('signUp')),
   onSignOutClick: () => dispatch(signOutUser()),
   getUserData: (login) => dispatch(getOthersData(login)),
-  onSearchFormSubmit: (term) => dispatch(searchTweetsByHashtag(term)),
+  onSearchFormSubmit: (query) => dispatch(searchTweetsByHashtag(query)),
 });
 
 

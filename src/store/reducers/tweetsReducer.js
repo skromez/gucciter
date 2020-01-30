@@ -1,13 +1,12 @@
 import {
-  ADD_DETAILED_TWEET,
+  ADD_DETAILED_TWEET, CHANGE_OFFSET,
   GET_USER_TWEETS,
   RESET_DETAILED_TWEET,
   SEND_TWEET_FAIL,
   SEND_TWEET_REQUEST,
-  SEND_TWEET_SUCCESS,
-  TOGGLE_EDIT_TWEET,
-  UPDATE_SEARCH,
-  UPDATE_TWEETS
+  SEND_TWEET_SUCCESS, SUBMIT_SEARCH_REQUEST, SUBMIT_SEARCH_SUCCESS,
+  TOGGLE_EDIT_TWEET, UPDATE_SEARCH,
+  UPDATE_TWEETS,
 } from '../types';
 
 const initialState = {
@@ -27,6 +26,11 @@ const initialState = {
     total: 0,
     page: 0,
     items: [],
+  },
+  loading: null,
+  query: {
+    term: null,
+    offset: null,
   },
 };
 
@@ -79,6 +83,34 @@ const tweetsReducer = (state = initialState, action) => {
         detailedTweet: {
           ...state.detailedTweet,
           ...action.payload,
+        },
+      };
+    case SUBMIT_SEARCH_REQUEST:
+      return {
+        ...state,
+        loading: true,
+      };
+    case SUBMIT_SEARCH_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        query: {
+          ...action.payload,
+        },
+      };
+    case UPDATE_SEARCH:
+      return {
+        ...state,
+        tweets: {
+          ...action.payload,
+        },
+      };
+    case CHANGE_OFFSET:
+      return {
+        ...state,
+        query: {
+          ...state.query,
+          offset: action.payload,
         },
       };
     case RESET_DETAILED_TWEET:

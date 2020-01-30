@@ -1,15 +1,17 @@
+import queryString from 'query-string';
 import {
-  ADD_DETAILED_TWEET,
+  ADD_DETAILED_TWEET, CHANGE_OFFSET,
   GET_USER_TWEETS,
   RESET_DETAILED_TWEET,
   SEND_TWEET_FAIL,
   SEND_TWEET_REQUEST,
-  SEND_TWEET_SUCCESS,
-  TOGGLE_EDIT_TWEET,
+  SEND_TWEET_SUCCESS, SUBMIT_SEARCH_REQUEST, SUBMIT_SEARCH_SUCCESS,
+  TOGGLE_EDIT_TWEET, UPDATE_SEARCH,
   UPDATE_TWEETS,
 } from '../types';
 import { toggleModal } from './uiActions';
 import axiosInstance from '../../utils/axios';
+import history from '../../utils/history';
 
 export const getUserTweets = (tweets) => ({
   type: GET_USER_TWEETS,
@@ -145,3 +147,46 @@ export const likeDetailedTweet = (id) => async (dispatch, getStore) => {
     console.log(err);
   }
 };
+
+export const updateSearch = (info) => ({
+  type: UPDATE_SEARCH,
+  payload: info,
+});
+
+const submitSearchRequest = () => ({ type: SUBMIT_SEARCH_REQUEST });
+
+const submitSearchSuccess = (query) => ({ type: SUBMIT_SEARCH_SUCCESS, payload: query });
+
+export const changeOffset = (offset) => ({ type: CHANGE_OFFSET, payload: offset });
+
+export const onChangePage = (page) => async (dispatch, getStore) => {
+  dispatch(submitSearchRequest());
+  try {
+    const newOffset = 5 * page;
+    dispatch(changeOffset(newOffset));
+    const { tweets } = getStore();
+    const newQuery = queryString.stringify(tweets.query);
+    const { data } = await axiosInstance.get(`/tweet?${newQuery}`);
+    const parsed = queryString.parse(newQuery);
+    history.push(`/search?${newQuery}`);
+    dispatch(updateSearch(data));
+    dispatch(submitSearchSuccess(parsed));
+  } catch (err) {
+    console.log(err);
+  }
+
+};
+
+
+export const searchTweetsByHashtag = (query) => async (dispatch) => {
+  dispatch(submitSearchRequest());
+  try {
+    const { data } = await axiosInstance.get(`/tweet${query}`);
+    const parsed = queryString.parse(query);
+    dispatch(updateSearch(data));
+    dispatch(submitSearchSuccess(parsed));
+  } catch (err) {
+    console.log(err);
+  }
+};
+
